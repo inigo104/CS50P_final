@@ -1,6 +1,6 @@
 import os
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, font, Canvas, Scrollbar, Frame, VERTICAL, S
 from docxtpl import DocxTemplate
 import pandas as pd
 from docx2pdf import convert
@@ -13,15 +13,24 @@ class InvoiceApp:
         self.master = master
         master.title("Invoice App")
 
-        self.tree = ttk.Treeview(master, selectmode='extended')
+        self.label = tk.Label(master, text="Invoices - Select the one you want to generate:")
+        self.label.pack(padx=10, pady=10)
+
+        frame = Frame(master)
+        frame.pack(padx=10, pady=10)
+
+        self.scrollbar = Scrollbar(frame)
+        self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        self.tree = ttk.Treeview(frame, selectmode='extended', yscrollcommand=self.scrollbar.set)
         self.tree["columns"]=("date", "day_of_week", "name", "total", "notes")
         self.tree.column("#0", width=100, minwidth=50, stretch=tk.NO)
         self.tree.column("date", width=100, minwidth=50, stretch=tk.NO)
         self.tree.column("day_of_week", width=100, minwidth=50, stretch=tk.NO)
-        self.tree.column("name", width=200, minwidth=100)
+        self.tree.column("name", width=160, minwidth=100)
         self.tree.column("total", width=100, minwidth=50, stretch=tk.NO)
         self.tree.column("notes", width=400, minwidth=200)
-        
+
         self.tree.heading("#0",text="Invoice Number",anchor=tk.W)
         self.tree.heading("date", text="Date",anchor=tk.W)
         self.tree.heading("day_of_week", text="Day of Week",anchor=tk.W)
@@ -29,15 +38,17 @@ class InvoiceApp:
         self.tree.heading("total", text="Total",anchor=tk.W)
         self.tree.heading("notes", text="Notes",anchor=tk.W)
 
+        self.scrollbar.config(command=self.tree.yview)
+
         excel_path = "invoice_data.xlsx"
         self.df_invoice = pd.read_excel(excel_path).set_index('invoice_number')
         self.df_client = pd.read_excel(excel_path, sheet_name=CLIENTS_SHEET_NAME).set_index('id')
 
         self.populate_treeview()
-        self.tree.pack()
+        self.tree.pack(side=tk.LEFT, fill=tk.BOTH)
 
         self.submit_button = tk.Button(master, text="Generate Invoice", command=self.main)
-        self.submit_button.pack()
+        self.submit_button.pack(side=tk.BOTTOM, padx=10, pady=10)
 
     def populate_treeview(self):
         for invoice_number in self.df_invoice.index:
