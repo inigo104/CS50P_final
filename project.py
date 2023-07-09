@@ -1,3 +1,4 @@
+import os
 import tkinter as tk
 from tkinter import ttk, messagebox
 from docxtpl import DocxTemplate
@@ -47,6 +48,8 @@ class InvoiceApp:
     def main(self):
         try:
             selected_invoices = [self.tree.item(item)['text'] for item in self.tree.selection()]
+            if not os.path.exists('invoices'):
+                os.makedirs('invoices')
             for invoice_number in selected_invoices:
                 invoice_data = self.get_invoice(invoice_number)
                 client_data = self.get_client(invoice_data["client_id"])
